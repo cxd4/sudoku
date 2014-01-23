@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 extern void error_freeze(const char* msg);
 
@@ -7,6 +8,8 @@ extern void error_freeze(const char* msg);
 int main(void)
 {
     FILE* stream;
+    clock_t t1, t2;
+    register float delta;
     register int x, y;
 
     stream = fopen("puzzle.txt", "r");
@@ -50,8 +53,12 @@ unexpected_eof:
     clear_puzzle_log();
     log_puzzle_status();
     show_puzzle_status();
+    t1 = clock();
     while (iterate_diagram());
+    t2 = clock();
     printf("\n");
+    delta = (float)(t2 - t1) / CLOCKS_PER_SEC;
+    printf("Calculation time:  %.3f seconds\n", delta);
     printf("Finished solving process.  Check \"answer.txt\".\n");
     return 0;
 }
