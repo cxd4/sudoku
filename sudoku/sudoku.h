@@ -154,6 +154,7 @@ static void show_puzzle_status(void)
                 output[2*x] = out_map[puzzle[y][x] - 1];
             output[2*x + 1] = ' ';
         }
+        output[2*x - 1] = '\0';
         printf("%s\n", output);
     }
     return;
