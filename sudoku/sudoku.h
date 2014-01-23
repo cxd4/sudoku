@@ -149,7 +149,7 @@ static void show_puzzle_status(void)
         for (x = 0; x < PUZZLE_DEPTH; x++)
         {
             if (puzzle[y][x] == 0)
-                output[2*x] = ' ';
+                output[2*x] = '.';
             else
                 output[2*x] = out_map[puzzle[y][x] - 1];
             output[2*x + 1] = ' ';
