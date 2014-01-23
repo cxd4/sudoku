@@ -12,8 +12,6 @@
 #error Puzzle size too large for character code page size.
 #endif
 
-static int trace_step_by_step;
-
 static int puzzle[PUZZLE_DEPTH][PUZZLE_DEPTH];
 static int possibilities[PUZZLE_DEPTH];
 const int out_map[TABLEMAPSIZE] = {
@@ -31,6 +29,7 @@ static void zero_possibilities(void);
 static int extract_possibility(void);
 static int is_valid_setup(int x, int y, int test);
 static void show_puzzle_status(void);
+static void log_puzzle_status(void);
 
 static int horizontal_test(int y);
 static int vertical_test(int x);
@@ -63,8 +62,7 @@ static int extract_possibility(void)
         return (possibilities[i]);
 #endif
     }
-    printf("Error:  %s\n", "Tried to read square solution when none existed.");
-    fgetc(stdin);
+    error_freeze("Tried to read square solution when none existed.");
     return 0;
 }
 
@@ -88,12 +86,12 @@ static int iterate_diagram(void)
             if (options == 1)
             {
                 puzzle[y][x] = extract_possibility();
-                if (trace_step_by_step)
-                {
-                    show_puzzle_status();
-                    getchar();
-                }
+                log_puzzle_status();
+#ifdef DEBUG
                 return (puzzle[y][x] != 0);
+#else
+                return 1;
+#endif
             }
 #ifdef DEBUG
             else if (options == 0)
@@ -157,6 +155,31 @@ static void show_puzzle_status(void)
         output[2*x - 1] = '\0';
         printf("%s\n", output);
     }
+    return;
+}
+
+static void log_puzzle_status(void)
+{
+    FILE* stream;
+    register int x, y;
+    char output[2*PUZZLE_DEPTH];
+
+    stream = fopen("answer.txt", "a");
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+    {
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+        {
+            if (puzzle[y][x] == 0)
+                output[2*x] = '.';
+            else
+                output[2*x] = out_map[puzzle[y][x] - 1];
+            output[2*x + 1] = ' ';
+        }
+        output[2*x - 1] = '\0';
+        fprintf(stream, "%s\n", output);
+    }
+    fputc('\n', stream);
+    fclose(stream);
     return;
 }
 

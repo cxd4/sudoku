@@ -47,10 +47,9 @@ unexpected_eof:
         return 1;
     }
     fclose(stream);
+    log_puzzle_status();
     show_puzzle_status();
-    printf("Pause the solver after each step (hint mode, Y/N)?\n");
-    trace_step_by_step = getchar() & 1; /* If the character is even, then no. */
     while (iterate_diagram());
-    show_puzzle_status();
+    printf("Finished solving process.  Check \"answer.txt\".\n");
     return 0;
 }
