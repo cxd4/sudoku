@@ -254,7 +254,7 @@ static int sub_grid_test(int x, int y)
 NOINLINE void error_freeze(const char * msg)
 {
     printf("Error:  %s\n", msg);
-    printf("Press Enter to RETURN.\n");
+    printf("Press ENTER to return.\n");
     getchar();
     return;
 }
