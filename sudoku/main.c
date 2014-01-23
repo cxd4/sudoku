@@ -16,12 +16,12 @@ int main(void)
         return 1;
     }
     printf("Loading puzzle...\n");
-    for (y = 0; y < REGION_WIDTH; y++)
+    for (y = 0; y < PUZZLE_DEPTH; y++)
     {
         int test;
         register int i;
 
-        for (x = 0; x < REGION_WIDTH; x++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
         {
             test = fgetc(stream);
             if (test == EOF)
@@ -30,15 +30,17 @@ int main(void)
                 if (out_map[i] == (char)test)
                     break;
             puzzle[y][x] = (i < PUZZLE_DEPTH) ? i + 1 : 0;
-            if (fgetc(stream) == EOF) /* Skip every other character of text. */
+            test = fgetc(stream); /* Skip every other character of text. */
+            if (test == EOF)
                 goto unexpected_eof;
         }
      /* Ignore all remaining bytes until the end of the line. */
-        do {
+        while (test != '\n')
+        {
             test = fgetc(stream);
             if (test == EOF)
                 goto unexpected_eof;
-        } while (test != '\n');
+        }
         continue;
 unexpected_eof:
         error_freeze("Unexpected end of puzzle text file.");
