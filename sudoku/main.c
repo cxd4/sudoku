@@ -15,7 +15,7 @@ int main(void)
         error_freeze("Failed to read \"puzzle.txt\".");
         return 1;
     }
-    printf("Loading puzzle...\n");
+    printf("Loading puzzle...\n\n");
     for (y = 0; y < PUZZLE_DEPTH; y++)
     {
         int test;
@@ -51,6 +51,7 @@ unexpected_eof:
     log_puzzle_status();
     show_puzzle_status();
     while (iterate_diagram());
+    printf("\n");
     printf("Finished solving process.  Check \"answer.txt\".\n");
     return 0;
 }
