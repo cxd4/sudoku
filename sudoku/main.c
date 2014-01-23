@@ -47,6 +47,7 @@ unexpected_eof:
         return 1;
     }
     fclose(stream);
+    clear_puzzle_log();
     log_puzzle_status();
     show_puzzle_status();
     while (iterate_diagram());

@@ -29,6 +29,7 @@ static void zero_possibilities(void);
 static int extract_possibility(void);
 static int is_valid_setup(int x, int y, int test);
 static void show_puzzle_status(void);
+static void clear_puzzle_log(void);
 static void log_puzzle_status(void);
 
 static int horizontal_test(int y);
@@ -155,6 +156,15 @@ static void show_puzzle_status(void)
         output[2*x - 1] = '\0';
         printf("%s\n", output);
     }
+    return;
+}
+
+static void clear_puzzle_log(void)
+{
+    FILE* stream;
+
+    stream = fopen("answer.txt", "wb");
+    fclose(stream);
     return;
 }
 
