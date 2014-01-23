@@ -225,24 +225,22 @@ static int vertical_test(int x)
 }
 static int sub_grid_test(int x, int y)
 {
-    int counts[REGION_WIDTH][REGION_WIDTH] = { };
+    int counts[PUZZLE_DEPTH] = { };
     register int i, j;
 /*
  * Align the grid coordinates to the upper-left of their parent sub-grid.
  */
     x -= x % REGION_WIDTH;
     y -= y % REGION_WIDTH;
-
     for (i = 0; i < REGION_WIDTH; i++)
         for (j = 0; j < REGION_WIDTH; j++)
             if (puzzle[y + i][x + j] == 0)
                 continue;
             else
-                ++counts[i][j];
-    for (i = 0; i < REGION_WIDTH; i++)
-        for (j = 0; j < REGION_WIDTH; j++)
-            if (counts[i][j] > 1)
-                return 0;
+                ++counts[puzzle[y + i][x + j] - 1];
+    for (i = 0; i < PUZZLE_DEPTH; i++)
+        if (counts[i] > 1)
+            return 0;
     return 1;
 }
 
