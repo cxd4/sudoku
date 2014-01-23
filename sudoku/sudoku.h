@@ -12,6 +12,9 @@
 #error Puzzle size too large for character code page size.
 #endif
 
+static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
+    -1, -1 /* initialized to prevent first-time logger from treating as found */
+};
 static int puzzle[PUZZLE_DEPTH][PUZZLE_DEPTH];
 static int possibilities[PUZZLE_DEPTH];
 const int out_map[TABLEMAPSIZE] = {
@@ -87,6 +90,8 @@ static int iterate_diagram(void)
             if (options == 1)
             {
                 puzzle[y][x] = extract_possibility();
+                last_found_square[0] = x;
+                last_found_square[1] = y;
                 log_puzzle_status();
 #ifdef DEBUG
                 return (puzzle[y][x] != 0);
@@ -186,7 +191,11 @@ static void log_puzzle_status(void)
             output[2*x + 1] = ' ';
         }
         output[2*x - 1] = '\0';
-        fprintf(stream, "%s\n", output);
+        if (y == last_found_square[1])
+            fprintf(stream, "%s <-- put a '%c' in this row\n",
+                output, output[2*last_found_square[0]]);
+        else
+            fprintf(stream, "%s\n", output);
     }
     fputc('\n', stream);
     fclose(stream);
