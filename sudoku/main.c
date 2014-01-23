@@ -29,12 +29,7 @@ int main(void)
             for (i = 0; i < PUZZLE_DEPTH; i++)
                 if (out_map[i] == (char)test)
                     break;
-            if (i >= PUZZLE_DEPTH)
-            {
-                error_freeze("Invalid Sudoku digit for this puzzle size.");
-                return 1;
-            }
-            puzzle[y][x] = i + 1;
+            puzzle[y][x] = (i < PUZZLE_DEPTH) ? i + 1 : 0;
             if (fgetc(stream) == EOF) /* Skip every other character of text. */
                 goto unexpected_eof;
         }
