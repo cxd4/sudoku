@@ -53,10 +53,14 @@ unexpected_eof:
     clear_puzzle_log();
 
     initialize_possibilities();
-    log_puzzle_status();
     show_puzzle_status();
     t1 = clock();
-    while (iterate_diagram());
+FIRST_PASS:
+    log_puzzle_status();
+    if (iterate_diagram() != 0)
+        goto FIRST_PASS;
+    if (iterate_diagram_uniquity() != 0)
+        goto FIRST_PASS;
     t2 = clock();
     printf("\n");
     delta = (float)(t2 - t1) / CLOCKS_PER_SEC;

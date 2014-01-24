@@ -27,7 +27,6 @@ const int out_map[TABLEMAPSIZE] = {
     'z', '-', '/' /* my attempt at supporting 64x64 grids */
 };
 
-static int iterate_diagram(void);
 static void initialize_possibilities(void);
 static int extract_possibility(int x, int y);
 static int is_valid_setup(int x, int y, int test);
@@ -35,9 +34,12 @@ static void show_puzzle_status(void);
 static void clear_puzzle_log(void);
 static void log_puzzle_status(void);
 
+static int iterate_diagram(void);
 static int horizontal_test(int y);
 static int vertical_test(int x);
 static int sub_grid_test(int x, int y);
+static int horizontal_uniquity_test(int y);
+static int vertical_uniquity_test(int x);
 
 static void initialize_possibilities(void)
 {
@@ -113,7 +115,6 @@ static int iterate_diagram(void)
                 puzzle[y][x] = extract_possibility(x, y);
                 last_found_square[0] = x;
                 last_found_square[1] = y;
-                log_puzzle_status();
 #ifdef DEBUG
                 return (puzzle[y][x] != 0);
 #else
@@ -125,6 +126,19 @@ static int iterate_diagram(void)
                 error_freeze("Found a square with no solutions.");
 #endif
         }
+    return 0;
+}
+
+static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
+{
+    register int x, y;
+
+    for (y = MAX_ELEMENT; y >= 0; --y)
+        if (horizontal_uniquity_test(y) != 0)
+            return 1;
+    for (x = MAX_ELEMENT; x >= 0; --x)
+        if (vertical_uniquity_test(x) != 0)
+            return 1;
 /*
  * More techniques to eliminate extra possibilities need to be implemented.
  */
@@ -270,6 +284,70 @@ static int sub_grid_test(int x, int y)
         if (counts[i] > 1)
             return 0;
     return 1;
+}
+static int horizontal_uniquity_test(int y)
+{
+    register int x, i;
+    int counts[PUZZLE_DEPTH] = { 0 };
+
+    for (x = 0; x < PUZZLE_DEPTH; x++)
+        for (i = 0; i < PUZZLE_DEPTH; i++)
+            counts[i] += (possibilities[y][x][i] == i + 1);
+#ifdef DEBUG
+    for (i = 0; i < PUZZLE_DEPTH; i++)
+        if (counts[i] == 0)
+            error_freeze("A digit was invalid across a whole row.");
+#endif
+    for (i = 0; i < PUZZLE_DEPTH; i++)
+    {
+        register int j;
+
+        if (counts[i] != 1)
+            continue;
+        for (x = 0; possibilities[y][x][i] != i + 1; x++);
+        if (puzzle[y][x] != 0)
+            continue;
+        puzzle[y][x] = i + 1;
+        last_found_square[0] = x;
+        last_found_square[1] = y;
+        for (j = 0; j < PUZZLE_DEPTH; j++)
+            possibilities[y][x][j] = 0;
+        possibilities[y][x][i] = puzzle[y][x];
+        return 1;
+    }
+    return 0;
+}
+static int vertical_uniquity_test(int x)
+{
+    register int y, i;
+    int counts[PUZZLE_DEPTH] = { 0 };
+
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (i = 0; i < PUZZLE_DEPTH; i++)
+            counts[i] += (possibilities[y][x][i] == i + 1);
+#ifdef DEBUG
+    for (i = 0; i < PUZZLE_DEPTH; i++)
+        if (counts[i] == 0)
+            error_freeze("A digit was invalid across a whole row.");
+#endif
+    for (i = 0; i < PUZZLE_DEPTH; i++)
+    {
+        register int j;
+
+        if (counts[i] != 1)
+            continue;
+        for (y = 0; possibilities[y][x][i] != i + 1; y++);
+        if (puzzle[y][x] != 0)
+            continue;
+        puzzle[y][x] = i + 1;
+        last_found_square[0] = x;
+        last_found_square[1] = y;
+        for (j = 0; j < PUZZLE_DEPTH; j++)
+            possibilities[y][x][j] = 0;
+        possibilities[y][x][i] = puzzle[y][x];
+        return 1;
+    }
+    return 0;
 }
 
 #ifdef _MSC_VER
