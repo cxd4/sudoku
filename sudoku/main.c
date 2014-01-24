@@ -51,6 +51,8 @@ unexpected_eof:
     }
     fclose(stream);
     clear_puzzle_log();
+
+    initialize_possibilities();
     log_puzzle_status();
     show_puzzle_status();
     t1 = clock();

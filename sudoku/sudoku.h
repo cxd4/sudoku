@@ -16,7 +16,7 @@ static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
     -1, -1 /* initialized to prevent first-time logger from treating as found */
 };
 static int puzzle[PUZZLE_DEPTH][PUZZLE_DEPTH];
-static int possibilities[PUZZLE_DEPTH];
+static int possibilities[PUZZLE_DEPTH][PUZZLE_DEPTH][PUZZLE_DEPTH];
 const int out_map[TABLEMAPSIZE] = {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', /* enough for 9x9 */
     'A', 'B', 'C', 'D', 'E', 'F', 'G', /* Dell's code page for 16x16 grids */
@@ -28,8 +28,8 @@ const int out_map[TABLEMAPSIZE] = {
 };
 
 static int iterate_diagram(void);
-static void zero_possibilities(void);
-static int extract_possibility(void);
+static void initialize_possibilities(void);
+static int extract_possibility(int x, int y);
 static int is_valid_setup(int x, int y, int test);
 static void show_puzzle_status(void);
 static void clear_puzzle_log(void);
@@ -39,12 +39,32 @@ static int horizontal_test(int y);
 static int vertical_test(int x);
 static int sub_grid_test(int x, int y);
 
-static void zero_possibilities(void)
+static void initialize_possibilities(void)
 {
     register int i;
+    register int x, y;
 
-    for (i = 0; i < PUZZLE_DEPTH; i++)
-        possibilities[i] = 0;
+/*
+ * Begin solving the puzzle assuming NOTHING.
+ * Assume the elimination of no possibilities; mark all digits as possible.
+ */
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            for (i = 0; i < PUZZLE_DEPTH; i++)
+                possibilities[y][x][i] = i + 1;
+
+/*
+ * Exception:  given squares already supplied by the end user.
+ * Erase all possibilities (except for one, of course) for given squares.
+ */
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            if (puzzle[y][x] != 0)
+            {
+                for (i = 0; i < PUZZLE_DEPTH; i++)
+                    possibilities[y][x][i] = 0;
+                possibilities[y][x][puzzle[y][x] - 1] = puzzle[y][x];
+            }
     return;
 }
 
@@ -52,18 +72,18 @@ static void zero_possibilities(void)
  * This function is called only when exactly ONE possibility for a square in
  * the puzzle has been found.  It then signals the writeback of that value.
  */
-static int extract_possibility(void)
+static int extract_possibility(int x, int y)
 {
     register int i;
 
     for (i = 0; i < PUZZLE_DEPTH; i++)
     {
-        if (possibilities[i] == 0)
+        if (possibilities[y][x][i] == 0)
             continue;
 #ifdef DEBUG
         return (i + 1);
 #else
-        return (possibilities[i]);
+        return (possibilities[y][x][i]);
 #endif
     }
     error_freeze("Tried to read square solution when none existed.");
@@ -75,7 +95,6 @@ static int iterate_diagram(void)
     register int x, y;
 
     for (y = MAX_ELEMENT; y >= 0; --y)
-    {
         for (x = MAX_ELEMENT; x >= 0; --x)
         {
             int options;
@@ -83,13 +102,15 @@ static int iterate_diagram(void)
 
             if (puzzle[y][x] != 0)
                 continue;
-            zero_possibilities();
+            for (test = PUZZLE_DEPTH; test != 0; --test)
+                possibilities[y][x][test - 1] &=
+                    is_valid_setup(x, y, test) & 1 ? ~0 : 0;
             options = 0;
             for (test = PUZZLE_DEPTH; test != 0; --test)
-                options += is_valid_setup(x, y, test);
+                options += (possibilities[y][x][test - 1] != 0);
             if (options == 1)
             {
-                puzzle[y][x] = extract_possibility();
+                puzzle[y][x] = extract_possibility(x, y);
                 last_found_square[0] = x;
                 last_found_square[1] = y;
                 log_puzzle_status();
@@ -104,7 +125,6 @@ static int iterate_diagram(void)
                 error_freeze("Found a square with no solutions.");
 #endif
         }
-    }
 /*
  * More techniques to eliminate extra possibilities need to be implemented.
  */
@@ -134,11 +154,10 @@ static int is_valid_setup(int x, int y, int test)
     pass = sub_grid_test(x, y);
     if (pass == 0)
         goto FAIL;
-    possibilities[test - 1] = test;
     puzzle[y][x] = 0;
     return 1;
 FAIL:
-    possibilities[test - 1] = 0;
+    possibilities[y][x][test - 1] = 0;
     puzzle[y][x] = 0;
     return 0;
 }
