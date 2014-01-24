@@ -12,6 +12,17 @@
 #error Puzzle size too large for character code page size.
 #endif
 
+static int desperate = 0;
+/*
+ * Here, "desperate" just means, "Try harder to eliminate more possibilities
+ * for at least one square," until one possibility is successfully removed.
+ *
+ * This raises the question, "Why make 'desperate' mode OPTIONAL?"
+ * Because these extra strategies risk solving the puzzle incorrectly IF,
+ * and only if, the puzzle is not a true Sudoku puzzle (such as the
+ * rebellious "Jigsaw" Sudoku variant, with non-3x3 box sub-grids).
+ */
+
 static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
     -1, -1 /* initialized to prevent first-time logger from treating as found */
 };
@@ -157,14 +168,17 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
 
     for (y = MAX_ELEMENT; y >= 0; --y)
         if (horizontal_uniquity_test(y) != 0)
-            return 1;
+            goto found_something;
     for (x = MAX_ELEMENT; x >= 0; --x)
         if (vertical_uniquity_test(x) != 0)
-            return 1;
+            goto found_something;
 /*
  * More techniques to eliminate extra possibilities need to be implemented.
  */
     return 0;
+found_something:
+    desperate = 0;
+    return 1;
 }
 
 static int is_valid_move(int x, int y, int test)
@@ -175,6 +189,8 @@ static int is_valid_move(int x, int y, int test)
     if (puzzle[y][x] != 0)
         error_freeze("Testing square already filled with a value.");
 #endif
+    if (possibilities[y][x][test - 1] == 0)
+        return 0; /* already determined by calling this before */
     puzzle[y][x] = test;
 
 /*
@@ -187,12 +203,17 @@ static int is_valid_move(int x, int y, int test)
     pass = vertical_test(x);
     if (pass == 0)
         goto FAIL;
+
+    if (desperate == 0)
+        goto PASS; /* Try to delay using the 3x3 "box" tests. */
     pass = sub_grid_test(x, y);
     if (pass == 0)
         goto FAIL;
+PASS:
     puzzle[y][x] = 0;
     return 1;
 FAIL:
+    desperate = 0;
     possibilities[y][x][test - 1] = 0;
     puzzle[y][x] = 0;
     return 0;

@@ -67,12 +67,18 @@ unexpected_eof:
     initialize_possibilities();
     show_puzzle_status();
     t1 = clock();
-FIRST_PASS:
+update_answer_log:
     log_puzzle_status();
+retry_with_desperation:
     if (iterate_diagram() != 0)
-        goto FIRST_PASS;
+        goto update_answer_log;
+ /* second pass */
     if (iterate_diagram_uniquity() != 0)
-        goto FIRST_PASS;
+        goto update_answer_log;
+ /* third pass */
+    desperate ^= 1;
+    if (desperate)
+        goto retry_with_desperation;
     t2 = clock();
     printf("\n");
     delta = (float)(t2 - t1) / CLOCKS_PER_SEC;
