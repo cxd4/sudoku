@@ -27,6 +27,7 @@ const int out_map[TABLEMAPSIZE] = {
     'z', '-', '/' /* my attempt at supporting 64x64 grids */
 };
 
+static int is_valid_Sudoku(void);
 static void initialize_possibilities(void);
 static int extract_possibility(int x, int y);
 static int is_valid_setup(int x, int y, int test);
@@ -40,6 +41,28 @@ static int vertical_test(int x);
 static int sub_grid_test(int x, int y);
 static int horizontal_uniquity_test(int y);
 static int vertical_uniquity_test(int x);
+
+static int is_valid_Sudoku(void)
+{
+    register int x, y;
+
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        if (horizontal_test(y) == 0)
+            return 0;
+    for (x = 0; x < PUZZLE_DEPTH; x++)
+        if (vertical_test(x) == 0)
+            return 0;
+#ifndef JIGSAW_SUDOKU
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            if (puzzle[y][x] == 0)
+                continue; /* Speed up search by assuming unknowns as valid. */
+            else
+                if (sub_grid_test(x, y) == 0)
+                    return -1;
+#endif
+    return 1;
+}
 
 static void initialize_possibilities(void)
 {
@@ -237,8 +260,8 @@ static void log_puzzle_status(void)
 
 static int horizontal_test(int y)
 {
-    int counts[PUZZLE_DEPTH] = { 0 };
     register int x;
+    int counts[PUZZLE_DEPTH] = { 0 };
 
     for (x = 0; x < PUZZLE_DEPTH; x++)
         if (puzzle[y][x] == 0)
@@ -252,8 +275,8 @@ static int horizontal_test(int y)
 }
 static int vertical_test(int x)
 {
-    int counts[PUZZLE_DEPTH] = { 0 };
     register int y;
+    int counts[PUZZLE_DEPTH] = { 0 };
 
     for (y = 0; y < PUZZLE_DEPTH; y++)
         if (puzzle[y][x] == 0)
@@ -267,13 +290,15 @@ static int vertical_test(int x)
 }
 static int sub_grid_test(int x, int y)
 {
-    int counts[PUZZLE_DEPTH] = { 0 };
     register int i, j;
+    int counts[PUZZLE_DEPTH] = { 0 };
+
 /*
  * Align the grid coordinates to the upper-left of their parent sub-grid.
  */
     x -= x % REGION_WIDTH;
     y -= y % REGION_WIDTH;
+
     for (i = 0; i < REGION_WIDTH; i++)
         for (j = 0; j < REGION_WIDTH; j++)
             if (puzzle[y + i][x + j] == 0)

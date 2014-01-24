@@ -51,6 +51,18 @@ unexpected_eof:
     }
     fclose(stream);
     clear_puzzle_log();
+    x = is_valid_Sudoku();
+    if (x == 0)
+    {
+        error_freeze("Invalid Sudoku puzzle.");
+        return 1;
+    }
+    if (x == -1)
+    {
+        printf("Potentially valid Jigsaw Sudoku puzzle?\n");
+        error_freeze("Invalid Sudoku puzzle.");
+        return 1;
+    }
 
     initialize_possibilities();
     show_puzzle_status();
