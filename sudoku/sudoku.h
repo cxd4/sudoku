@@ -204,7 +204,7 @@ static void log_puzzle_status(void)
 
 static int horizontal_test(int y)
 {
-    int counts[PUZZLE_DEPTH] = { };
+    int counts[PUZZLE_DEPTH] = { 0 };
     register int x;
 
     for (x = 0; x < PUZZLE_DEPTH; x++)
@@ -219,7 +219,7 @@ static int horizontal_test(int y)
 }
 static int vertical_test(int x)
 {
-    int counts[PUZZLE_DEPTH] = { };
+    int counts[PUZZLE_DEPTH] = { 0 };
     register int y;
 
     for (y = 0; y < PUZZLE_DEPTH; y++)
@@ -234,7 +234,7 @@ static int vertical_test(int x)
 }
 static int sub_grid_test(int x, int y)
 {
-    int counts[PUZZLE_DEPTH] = { };
+    int counts[PUZZLE_DEPTH] = { 0 };
     register int i, j;
 /*
  * Align the grid coordinates to the upper-left of their parent sub-grid.
