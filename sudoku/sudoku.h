@@ -29,8 +29,8 @@ const int out_map[TABLEMAPSIZE] = {
 
 static int is_valid_Sudoku(void);
 static void initialize_possibilities(void);
+static int is_valid_move(int x, int y, int test);
 static int extract_possibility(int x, int y);
-static int is_valid_setup(int x, int y, int test);
 static void show_puzzle_status(void);
 static void clear_puzzle_log(void);
 static void log_puzzle_status(void);
@@ -128,8 +128,7 @@ static int iterate_diagram(void)
             if (puzzle[y][x] != 0)
                 continue;
             for (test = PUZZLE_DEPTH; test != 0; --test)
-                possibilities[y][x][test - 1] &=
-                    is_valid_setup(x, y, test) & 1 ? ~0 : 0;
+                is_valid_move(x, y, test);
             options = 0;
             for (test = PUZZLE_DEPTH; test != 0; --test)
                 options += (possibilities[y][x][test - 1] != 0);
@@ -168,7 +167,7 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
     return 0;
 }
 
-static int is_valid_setup(int x, int y, int test)
+static int is_valid_move(int x, int y, int test)
 {
     int pass;
 
