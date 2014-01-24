@@ -12,6 +12,14 @@
 #error Puzzle size too large for character code page size.
 #endif
 
+#ifdef _MSC_VER
+#define NOINLINE    __declspec(noinline)
+#elif defined(__GNUC__)
+#define NOINLINE    __attribute__((noinline))
+#else
+#define NOINLINE
+#endif
+
 static int desperate = 0;
 /*
  * Here, "desperate" just means, "Try harder to eliminate more possibilities
@@ -21,6 +29,12 @@ static int desperate = 0;
  * Because these extra strategies risk solving the puzzle incorrectly IF,
  * and only if, the puzzle is not a true Sudoku puzzle (such as the
  * rebellious "Jigsaw" Sudoku variant, with non-3x3 box sub-grids).
+ */
+static int error_factor = 0;
+/*
+ * The number of times `desperate` mode was required to continue with the
+ * solution of the puzzle (thus, the chance that the found solution might
+ * not be the correct Sudoku solution for other, special variations of it).
  */
 
 static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
@@ -39,6 +53,7 @@ const int out_map[TABLEMAPSIZE] = {
 };
 
 static int is_valid_Sudoku(void);
+static int count_unknown_squares(void);
 static void initialize_possibilities(void);
 static int is_valid_move(int x, int y, int test);
 static int extract_possibility(int x, int y);
@@ -73,6 +88,18 @@ static int is_valid_Sudoku(void)
                     return -1;
 #endif
     return 1;
+}
+
+NOINLINE static int count_unknown_squares(void)
+{
+    register int x, y;
+    register int unsolved;
+
+    unsolved = 0;
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            unsolved += (puzzle[y][x] == 0);
+    return (unsolved);
 }
 
 static void initialize_possibilities(void)
@@ -395,13 +422,6 @@ static int vertical_uniquity_test(int x)
     return 0;
 }
 
-#ifdef _MSC_VER
-#define NOINLINE    __declspec(noinline)
-#elif defined(__GNUC__)
-#define NOINLINE    __attribute__((noinline))
-#else
-#define NOINLINE
-#endif
 NOINLINE void error_freeze(const char * msg)
 {
     printf("Error:  %s\n", msg);

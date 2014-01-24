@@ -63,6 +63,7 @@ unexpected_eof:
         error_freeze("Invalid Sudoku puzzle.");
         return 1;
     }
+    y = count_unknown_squares();
 
     initialize_possibilities();
     show_puzzle_status();
@@ -72,17 +73,18 @@ update_answer_log:
 retry_with_desperation:
     if (iterate_diagram() != 0)
         goto update_answer_log;
- /* second pass */
     if (iterate_diagram_uniquity() != 0)
         goto update_answer_log;
- /* third pass */
-    desperate ^= 1;
+    desperate ^= (count_unknown_squares() != 0);
+    error_factor += desperate;
     if (desperate)
         goto retry_with_desperation;
     t2 = clock();
     printf("\n");
     delta = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Calculation time:  %.3f seconds\n", delta);
+    delta = (float)(error_factor) / (float)(y);
+    printf("Skepticism ratio:  %i / %i (%f%%)\n", error_factor, y, 100.F*delta);
     printf("Finished solving process.  Check \"answer.txt\".\n");
     return 0;
 }
