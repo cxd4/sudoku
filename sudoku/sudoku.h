@@ -3,7 +3,7 @@
 #define DEBUG
 #undef DEBUG
 
-#define REGION_WIDTH    4
+#define REGION_WIDTH    3
 #define PUZZLE_DEPTH    ((REGION_WIDTH) * (REGION_WIDTH))
 #define TABLEMAPSIZE    64
 
@@ -52,7 +52,7 @@ const char out_map[TABLEMAPSIZE] = {
     'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
     'W', 'X', 'Y', 'Z', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
     'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-    'z', '-', '/' /* my attempt at supporting 64x64 grids */
+    'z', '=', '$' /* my attempt at supporting 64x64 grids */
 };
 
 static int is_valid_Sudoku(void);
