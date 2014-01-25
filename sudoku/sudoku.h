@@ -3,7 +3,7 @@
 #define DEBUG
 #undef DEBUG
 
-#define REGION_WIDTH    3
+#define REGION_WIDTH    4
 #define PUZZLE_DEPTH    ((REGION_WIDTH) * (REGION_WIDTH))
 #define TABLEMAPSIZE    64
 
