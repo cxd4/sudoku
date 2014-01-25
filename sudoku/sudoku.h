@@ -5,7 +5,6 @@
 
 #define REGION_WIDTH    3
 #define PUZZLE_DEPTH    ((REGION_WIDTH) * (REGION_WIDTH))
-#define MAX_ELEMENT     ((PUZZLE_DEPTH) - 1)
 #define TABLEMAPSIZE    64
 
 #if (PUZZLE_DEPTH > TABLEMAPSIZE)
@@ -61,11 +60,11 @@ static void show_puzzle_status(void);
 static void clear_puzzle_log(void);
 static void log_puzzle_status(void);
 
-static int iterate_diagram(void);
+NOINLINE static int iterate_diagram(void);
 static int horizontal_test(int y);
 static int vertical_test(int x);
 static int sub_grid_test(int x, int y);
-static int iterate_diagram_uniquity(void);
+NOINLINE static int iterate_diagram_uniquity(void);
 static int horizontal_uniquity_test(int y);
 static int vertical_uniquity_test(int x);
 static int box_uniquity_test(int x, int y);
@@ -195,13 +194,15 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
 {
     register int x, y;
 
-    for (y = MAX_ELEMENT; y >= 0; --y)
+    for (y = 0; y < PUZZLE_DEPTH; y++)
         if (horizontal_uniquity_test(y) != 0)
             goto found_something;
-    for (x = MAX_ELEMENT; x >= 0; --x)
+    for (x = 0; x < PUZZLE_DEPTH; x++)
         if (vertical_uniquity_test(x) != 0)
             goto found_something;
 
+    if (desperate == 0)
+        return 0;
     for (y = 0; y < REGION_WIDTH; y++)
         for (x = 0; x < REGION_WIDTH; x++)
             if (box_uniquity_test(x, y) != 0)
