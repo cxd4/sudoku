@@ -65,8 +65,10 @@ static int iterate_diagram(void);
 static int horizontal_test(int y);
 static int vertical_test(int x);
 static int sub_grid_test(int x, int y);
+static int iterate_diagram_uniquity(void);
 static int horizontal_uniquity_test(int y);
 static int vertical_uniquity_test(int x);
+static int box_uniquity_test(int x, int y);
 
 static int is_valid_Sudoku(void)
 {
@@ -199,9 +201,13 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
     for (x = MAX_ELEMENT; x >= 0; --x)
         if (vertical_uniquity_test(x) != 0)
             goto found_something;
-/*
- * More techniques to eliminate extra possibilities need to be implemented.
- */
+
+    if (desperate == 0)
+        return 0;
+    for (y = 0; y < REGION_WIDTH; y++)
+        for (x = 0; x < REGION_WIDTH; x++)
+            if (box_uniquity_test(x, y) != 0)
+                return 1; /* goto found_something; ? */
     return 0;
 found_something:
     desperate = 0;
@@ -417,6 +423,50 @@ static int vertical_uniquity_test(int x)
         for (j = 0; j < PUZZLE_DEPTH; j++)
             possibilities[y][x][j] = 0;
         possibilities[y][x][i] = puzzle[y][x];
+        return 1;
+    }
+    return 0;
+}
+static int box_uniquity_test(int x, int y)
+{
+    register int i, j, count;
+    int counts[PUZZLE_DEPTH] = { 0 };
+
+/*
+ * x and y should already have been multiples of REGION_WIDTH upon calling
+ * the function, but there's no serious harm in making sure.
+ */
+    x = REGION_WIDTH * (x % REGION_WIDTH);
+    y = REGION_WIDTH * (y % REGION_WIDTH);
+
+    for (j = 0; j < REGION_WIDTH; j++)
+        for (i = 0; i < REGION_WIDTH; i++)
+            for (count = 0; count < PUZZLE_DEPTH; count++)
+                if (possibilities[y + j][x + i][count] != count + 1)
+                    continue;
+                else
+                    ++counts[count];
+#ifdef DEBUG
+    for (count = 0; count < PUZZLE_DEPTH; count++)
+        if (counts[count] == 0)
+            error_freeze("A digit was invalid throughout an entire box.");
+#endif
+    for (count = 0; count < PUZZLE_DEPTH; count++)
+    {
+        if (counts[count] != 1)
+            continue;
+        for (j = 0; possibilities[y + j][x + i][count] != count + 1; j++);
+        for (i = 0; possibilities[y + j][x + i][count] != count + 1; i++);
+        if (puzzle[y + j][x + i] != 0)
+            continue;
+        x += i;
+        y += j;
+        puzzle[y][x] = count + 1;
+        last_found_square[0] = x;
+        last_found_square[1] = y;
+        for (i = 0; i < PUZZLE_DEPTH; i++)
+            possibilities[y][x][i] = 0;
+        possibilities[y][x][count] = puzzle[y][x];
         return 1;
     }
     return 0;
