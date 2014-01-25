@@ -215,21 +215,18 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
 
     for (y = 0; y < PUZZLE_DEPTH; y++)
         if (horizontal_uniquity_test(y) != 0)
-            goto found_something;
+            return 1;
     for (x = 0; x < PUZZLE_DEPTH; x++)
         if (vertical_uniquity_test(x) != 0)
-            goto found_something;
+            return 1;
 
     if (desperate == 0)
         return 0;
     for (y = 0; y < REGION_WIDTH; y++)
         for (x = 0; x < REGION_WIDTH; x++)
             if (box_uniquity_test(x, y) != 0)
-                goto found_something;
+                return 1;
     return 0;
-found_something:
-    desperate = 0;
-    return 1;
 }
 
 static int is_valid_move(int x, int y, int test)
@@ -264,7 +261,6 @@ PASS:
     puzzle[y][x] = 0;
     return 1;
 FAIL:
-    desperate = 0;
     possibilities[y][x][test - 1] = 0;
     puzzle[y][x] = 0;
     return 0;

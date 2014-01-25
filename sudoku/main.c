@@ -72,6 +72,7 @@ unexpected_eof:
     t1 = clock();
 update_answer_log:
     log_puzzle_status();
+    desperate = 0;
 retry_with_desperation:
     if (iterate_diagram() != 0)
         goto update_answer_log;
