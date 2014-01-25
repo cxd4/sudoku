@@ -157,8 +157,8 @@ static int iterate_diagram(void)
 {
     register int x, y;
 
-    for (y = MAX_ELEMENT; y >= 0; --y)
-        for (x = MAX_ELEMENT; x >= 0; --x)
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
         {
             int options;
             int test;
