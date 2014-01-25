@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <time.h>
 
@@ -24,6 +25,7 @@ int main(void)
         int test;
         register int i;
 
+        test = 0; /* Visual Studio thinks is left "potentially uninitialized" */
         for (x = 0; x < PUZZLE_DEPTH; x++)
         {
             test = fgetc(stream);

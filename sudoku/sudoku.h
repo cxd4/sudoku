@@ -12,10 +12,13 @@
 #endif
 
 #ifdef _MSC_VER
+#define INLINE      __inline
 #define NOINLINE    __declspec(noinline)
 #elif defined(__GNUC__)
+#define INLINE      inline
 #define NOINLINE    __attribute__((noinline))
 #else
+#define INLINE
 #define NOINLINE
 #endif
 
@@ -41,7 +44,7 @@ static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
 };
 static int puzzle[PUZZLE_DEPTH][PUZZLE_DEPTH];
 static int possibilities[PUZZLE_DEPTH][PUZZLE_DEPTH][PUZZLE_DEPTH];
-const int out_map[TABLEMAPSIZE] = {
+const char out_map[TABLEMAPSIZE] = {
     '1', '2', '3', '4', '5', '6', '7', '8', '9', /* enough for 9x9 */
     'A', 'B', 'C', 'D', 'E', 'F', 'G', /* Dell's code page for 16x16 grids */
 
@@ -136,7 +139,7 @@ static void initialize_possibilities(void)
  * This function is called only when exactly ONE possibility for a square in
  * the puzzle has been found.  It then signals the writeback of that value.
  */
-static int extract_possibility(int x, int y)
+INLINE static int extract_possibility(int x, int y)
 {
     register int i;
 
@@ -272,7 +275,7 @@ static void show_puzzle_status(void)
     return;
 }
 
-static void clear_puzzle_log(void)
+INLINE static void clear_puzzle_log(void)
 {
     FILE* stream;
 
@@ -431,6 +434,7 @@ static int box_uniquity_test(int x, int y)
     register int i, j, count;
     int counts[PUZZLE_DEPTH] = { 0 };
 
+    i = 0; /* Visual Studio thought this was "potentially uninitialized". */
 /*
  * x and y should already have been multiples of REGION_WIDTH upon calling
  * the function, but there's no serious harm in making sure.
