@@ -83,6 +83,7 @@ retry_with_desperation:
     if (desperate)
         goto retry_with_desperation;
     t2 = clock();
+    fclose(logger);
     printf("\n");
     delta = (float)(t2 - t1) / CLOCKS_PER_SEC;
     printf("Calculation time:  %.3f seconds\n", delta);

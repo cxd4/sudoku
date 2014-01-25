@@ -39,6 +39,7 @@ static int error_factor = 0;
  * not be the correct Sudoku solution for other, special variations of it).
  */
 
+static FILE * logger;
 static int last_found_square[2] = { /* (x, y) = (ptr[0], ptr[1]) */
     -1, -1 /* initialized to prevent first-time logger from treating as found */
 };
@@ -289,20 +290,17 @@ static void show_puzzle_status(void)
 
 INLINE static void clear_puzzle_log(void)
 {
-    FILE* stream;
-
-    stream = fopen("answer.txt", "wb");
-    fclose(stream);
+    logger = fopen("answer.txt", "w");
+    fclose(logger);
+    logger = fopen("answer.txt", "a");
     return;
 }
 
 static void log_puzzle_status(void)
 {
-    FILE* stream;
     register int x, y;
     char output[2*PUZZLE_DEPTH];
 
-    stream = fopen("answer.txt", "a");
     for (y = 0; y < PUZZLE_DEPTH; y++)
     {
         for (x = 0; x < PUZZLE_DEPTH; x++)
@@ -315,13 +313,12 @@ static void log_puzzle_status(void)
         }
         output[2*x - 1] = '\0';
         if (y == last_found_square[1])
-            fprintf(stream, "%s <-- put a '%c' in this row\n",
+            fprintf(logger, "%s <-- put a '%c' in this row\n",
                 output, output[2*last_found_square[0]]);
         else
-            fprintf(stream, "%s\n", output);
+            fprintf(logger, "%s\n", output);
     }
-    fputc('\n', stream);
-    fclose(stream);
+    fputc('\n', logger);
     return;
 }
 
