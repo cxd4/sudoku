@@ -55,6 +55,7 @@ const char out_map[TABLEMAPSIZE] = {
 };
 
 static int is_valid_Sudoku(void);
+static int unsolved_Sudoku(void);
 static int count_unknown_squares(void);
 static void initialize_possibilities(void);
 static int is_valid_move(int x, int y, int test);
@@ -94,7 +95,22 @@ static int is_valid_Sudoku(void)
     return 1;
 }
 
-NOINLINE static int count_unknown_squares(void)
+static int unsolved_Sudoku(void)
+{
+#ifdef DEBUG
+    return (count_unknown_squares() != 0);
+#else
+    register int x, y;
+
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            if (puzzle[y][x] == 0)
+                return 1;
+    return 0;
+#endif
+}
+
+static int count_unknown_squares(void)
 {
     register int x, y;
     register int unsolved;

@@ -77,7 +77,7 @@ retry_with_desperation:
         goto update_answer_log;
     if (iterate_diagram_uniquity() != 0)
         goto update_answer_log;
-    desperate ^= (count_unknown_squares() != 0);
+    desperate ^= unsolved_Sudoku();
     error_factor += desperate;
     if (desperate)
         goto retry_with_desperation;
