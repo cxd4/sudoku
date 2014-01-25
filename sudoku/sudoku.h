@@ -202,12 +202,10 @@ static int iterate_diagram_uniquity(void) /* same thing in elimination mode */
         if (vertical_uniquity_test(x) != 0)
             goto found_something;
 
-    if (desperate == 0)
-        return 0;
     for (y = 0; y < REGION_WIDTH; y++)
         for (x = 0; x < REGION_WIDTH; x++)
             if (box_uniquity_test(x, y) != 0)
-                return 1; /* goto found_something; ? */
+                goto found_something;
     return 0;
 found_something:
     desperate = 0;
@@ -455,8 +453,11 @@ static int box_uniquity_test(int x, int y)
     {
         if (counts[count] != 1)
             continue;
-        for (j = 0; possibilities[y + j][x + i][count] != count + 1; j++);
-        for (i = 0; possibilities[y + j][x + i][count] != count + 1; i++);
+        for (j = 0; j < REGION_WIDTH; j++)
+            for (i = 0; i < REGION_WIDTH; i++)
+                if (possibilities[y + j][x + i][count] == count + 1)
+                    goto breakpoint;
+breakpoint:
         if (puzzle[y + j][x + i] != 0)
             continue;
         x += i;
