@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 extern void error_freeze(const char* msg);
@@ -68,6 +69,7 @@ unexpected_eof:
     }
     y = count_unknown_squares();
 
+    srand((unsigned int)time(NULL));
     initialize_possibilities();
     show_puzzle_status();
     t1 = clock();

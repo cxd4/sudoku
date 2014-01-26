@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define DEBUG
 #undef DEBUG
@@ -490,6 +491,7 @@ breakpoint:
 
 static int selective_brute_force(void)
 {
+    int option1, option2;
     register int x, y, i, options;
 
     for (y = 0; y < PUZZLE_DEPTH; y++)
@@ -508,26 +510,18 @@ static int selective_brute_force(void)
             }
     return 0;
 attempt_brute_force:
-    options &= 0;
-    printf("Attempting pseudo-brute-force on (x, y) = (%i, %i)...\n",
-        x, y);
+    printf("Attempting pseudo-brute-force on (x, y) = (%i, %i)...\n", x, y);
     for (i = 0; possibilities[y][x][i] == 0; i++);
-    puzzle[y][x] = possibilities[y][x][i];
-    options |= iterate_diagram() << 0;
-    options |= iterate_diagram_uniquity() << 0;
+    option1 = possibilities[y][x][i];
     while (possibilities[y][x][++i] == 0);
-    puzzle[y][x] = possibilities[y][x][i];
-    options |= iterate_diagram() << 1;
-    options |= iterate_diagram_uniquity() << 1;
-    puzzle[y][x] = 0;
-    switch (options)
-    {
-        case 0:  return 0;
-        case 1:  goto pass_first_option;
-        case 2:  goto pass_second_option;
-        case 2 | 1:  goto pass_second_option;
-    }
+    option2 = possibilities[y][x][i];
+    if (rand() & 1)
+        goto pass_first_option;
+    else
+        goto pass_second_option;
 pass_first_option:
+    last_found_square[0] = x;
+    last_found_square[1] = y;
     i = -1;
     while (possibilities[y][x][++i] == 0);
     puzzle[y][x] = possibilities[y][x][i];
@@ -535,6 +529,8 @@ pass_first_option:
         possibilities[y][x][i] = 0;
     return 1;
 pass_second_option:
+    last_found_square[0] = x;
+    last_found_square[1] = y;
     i = PUZZLE_DEPTH;
     while (possibilities[y][x][--i] == 0);
     puzzle[y][x] = possibilities[y][x][i];
