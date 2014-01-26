@@ -10,6 +10,7 @@ int main(void)
 {
     FILE* stream;
     clock_t t1, t2;
+    int tmp;
     register float delta;
     register int x, y;
 
@@ -78,10 +79,14 @@ retry_with_desperation:
         goto update_answer_log;
     if (iterate_diagram_uniquity() != 0)
         goto update_answer_log;
-    desperate ^= unsolved_Sudoku();
+    tmp = unsolved_Sudoku();
+    desperate ^= tmp;
     error_factor += desperate;
     if (desperate)
         goto retry_with_desperation;
+    if (tmp)
+        if (selective_brute_force())
+            goto update_answer_log;
     t2 = clock();
     fclose(logger);
     printf("\n");

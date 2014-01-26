@@ -65,6 +65,7 @@ static void show_puzzle_status(void);
 static void clear_puzzle_log(void);
 static void log_puzzle_status(void);
 
+static int selective_brute_force(void);
 NOINLINE static int iterate_diagram(void);
 static int horizontal_test(int y);
 static int vertical_test(int x);
@@ -485,6 +486,61 @@ breakpoint:
         return 1;
     }
     return 0;
+}
+
+static int selective_brute_force(void)
+{
+    register int x, y, i, options;
+
+    for (y = 0; y < PUZZLE_DEPTH; y++)
+        for (x = 0; x < PUZZLE_DEPTH; x++)
+            if (puzzle[y][x] != 0)
+                continue;
+            else
+            {
+                for (options = 0, i = 0; i < PUZZLE_DEPTH; i++)
+                    if (possibilities[y][x][i] == 0)
+                        continue;
+                    else
+                        ++options;
+                if (options == 2)
+                    goto attempt_brute_force;
+            }
+    return 0;
+attempt_brute_force:
+    options &= 0;
+    printf("Attempting pseudo-brute-force on (x, y) = (%i, %i)...\n",
+        x, y);
+    for (i = 0; possibilities[y][x][i] == 0; i++);
+    puzzle[y][x] = possibilities[y][x][i];
+    options |= iterate_diagram() << 0;
+    options |= iterate_diagram_uniquity() << 0;
+    while (possibilities[y][x][++i] == 0);
+    puzzle[y][x] = possibilities[y][x][i];
+    options |= iterate_diagram() << 1;
+    options |= iterate_diagram_uniquity() << 1;
+    puzzle[y][x] = 0;
+    switch (options)
+    {
+        case 0:  return 0;
+        case 1:  goto pass_first_option;
+        case 2:  goto pass_second_option;
+        case 2 | 1:  goto pass_second_option;
+    }
+pass_first_option:
+    i = -1;
+    while (possibilities[y][x][++i] == 0);
+    puzzle[y][x] = possibilities[y][x][i];
+    while (++i < PUZZLE_DEPTH)
+        possibilities[y][x][i] = 0;
+    return 1;
+pass_second_option:
+    i = PUZZLE_DEPTH;
+    while (possibilities[y][x][--i] == 0);
+    puzzle[y][x] = possibilities[y][x][i];
+    while (--i >= 0)
+        possibilities[y][x][i] = 0;
+    return 1;
 }
 
 NOINLINE void error_freeze(const char * msg)
